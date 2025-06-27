@@ -49,4 +49,4 @@ Contributions and suggestions are welcome. Open issues or pull requests for disc
 
 ## License
 
-Licensed under the MIT License. See LICENSE for details.
+Licensed under the Apache License. See LICENSE for details.
