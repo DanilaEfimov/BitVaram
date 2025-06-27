@@ -5,7 +5,11 @@
 
 #include <iostream>
 
+#include "preprocessor.h"
 #include "lexer.h"
 #include "parser.h"
+#include "IRcompiler.h"
+
+#include "boost/program_options/config.hpp"
 
 // TODO: установите здесь ссылки на дополнительные заголовки, требующиеся для программы.
