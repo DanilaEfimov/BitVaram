@@ -1,36 +1,26 @@
-Программа на BitVaram включает в себя следующие уровни памяти:
+The BitVaram program includes the following memory levels:
 
-## Регистровая память.
+Register Memory.
 
-Представляет собой 3 регистра для буферизации стандартных потоков, счетчик и регистр флагов.
+Consists of three registers for buffering standard streams, a counter, and a flags register.
 
----
+Standard Output Register:
+By default, it is 1 byte in size and uses an ASCII-like code table. Output is done using reserved text commands. The register has two states: waiting and ready. In the ready state, the register contains a non-zero code available for output. In the waiting state, the register contains a special reserved value — a zero byte, which means output stops.
 
-#Регистр стандартного вывода:
-По умолчанию имеет размер 1 байт, использует ascii-подобную кодовую таблицу. Для вывода используются зарезервированные текстовые команды. Регистр имеет два состояния: ожидание и готовность. В режиме готовности регистр содержит в себе ненулевой код, доступный для вывода. В режиме ожидания регистр содержит специальное зарезервированное значение - нулевой байт, в таком случае вывод прекращается.
+Standard Input Register:
+By default, it is 1 byte in size and uses an ASCII-like code table. Input is performed using reserved text commands. The register has two states: waiting and ready. In the ready state, the register contains a non-zero code, the symbol is immediately output — the register switches to the waiting state. In the waiting state, the register contains a zero code, which is invalid for output.
 
-#Регистр стандартного ввода:
-По умолчанию имеет размер 1 байт, использует ascii-подобную кодовую таблицу. Для ввода используются зарезервированные текстовые команды. Регистр имеет два состояния: ожидание и готовность. В режиме готовности регистр содержит в себе нулевой код, недопустимый для вывода. В режиме ожидания регистр содержит в себе нулевой код, недопустимый для вывода. В режиме готовности регистр содержит в себе ненулевой код, символ немедленно выводится - регистр переходит в состояние ожидания.
+Counter:
+By default, it is 2 bytes in size and holds a non-negative number. It is modified using reserved text commands (for loop, see syntax.txt). Used for organizing loops.
 
-#Счетчик:
-по умолчанию имеет размер 2 байта, содержит в себе код неотрицательного числа. Для изменения используются зарезервированные текстовые команды (for-цикл, подробнее в syntax.txt). Используется для организации циклов.
+Flags Register:
+By language standard, it is 16 bits in size. Flags are set using reserved text commands (not all flags are available for manual change). It can be used for branching (if conditional operator, see syntax.txt) and error reporting.
 
-#Регистр флагов:
-По стандарту языка имеет размер 16 бит. Для установки флагов используются зарезервированные текстовые команды (не все флаги доступны для ручного изменения). Может использоваться для организации ветвления (if-условный оператор, подробнее в syntax.txt), и регистрации ошибок.
+Tape
 
----
+Variables that are not involved in computations are stored on a hypothetically infinite tape — a byte vector. At runtime, memory for variables is allocated in an infinite loop manner (like operator_new() in C++), and the numbers of used cells and offsets are stored in a special structure. By default, the tape length is 1024 bytes.
 
-## Лента
+Stack
 
----
+Variables used during computations are stored in a special stack-oriented structure. By default, the stack size is 64 bytes. Variables declared inside function bodies have a limited lifetime. These variables are the only category under automatic control; for the others, explicit deallocation is required.
 
-Переменные, с которыми не происходит вычислений, хранятся на гипотетически бесконечной ленте - байтовом векторе. В runtime память для переменной выделяется в бесконечном цикле (как operator_new() в C++), номера использованных ячеек и смещения хранятся в специальной структуре.
-По умолчанию длина ленты составляет 1024 байта.
-
----
-
-## Стек
-
----
-
-Переменные в момент вычислений хранятся в специальной стек-ориентированной структуре. По умолчанию стек имеет размер 64 байт. Переменные, объявленные в теле функции имеют ограниченное время жизни, эти переменные - единственная категория, за которой ведется автоматический контроль, для остальных необходимо выполнить разопределение.
