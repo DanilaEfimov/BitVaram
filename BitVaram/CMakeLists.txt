@@ -18,5 +18,6 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.12")
 endif()
 
 target_link_libraries(BitVaram PRIVATE libboost_program_options-vc143-mt-gd-x64-1_87)
+target_link_libraries(BitVaram PRIVATE libboost_regex-vc143-mt-gd-x64-1_87)
 
 # TODO: Добавьте тесты и дополнительные цели, если нужно.

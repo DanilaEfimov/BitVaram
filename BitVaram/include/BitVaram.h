@@ -9,6 +9,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "IRcompiler.h"
+#include "config.h"
 
 #include "boost/program_options/config.hpp"
 
