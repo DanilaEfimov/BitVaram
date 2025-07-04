@@ -31,6 +31,11 @@ namespace compiler {
         int line;
         int column;
 
+        operator std::string() const {
+            return this->filename + ": (" + std::to_string(line)
+                + ", " + std::to_string(this->column) + ")";
+        };
+
         Position() : filename(), line(-1), column(-1) {};
         Position(const std::string& file, int l, int c)
             : filename(file), line(l), column(c) {};
@@ -47,15 +52,17 @@ namespace compiler {
     };
 
     // Simple logger with severity levels
+    enum class Level {
+        Info,
+        Warning,
+        Error
+    };
+
     class Logger {
     public:
-        enum class Level {
-            Info,
-            Warning,
-            Error
-        };
-
         void log(Level level, const std::string& message, const Position& pos = Position());
+    private:
+        constexpr std::string levelToStr(Level level) const;
     };
 
     // Main compilation context storing state, errors, source, and logger
