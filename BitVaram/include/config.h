@@ -19,7 +19,10 @@ namespace varam {
 
         std::string getInputFile() const;
         template<typename T>
-        T get(const std::string& key) const;
+        T get(const std::string& key) const noexcept(false);
+
+        template<typename T>
+        void set(const std::string& key, const T& value) noexcept(false);
 
     private:
         po::options_description desc;

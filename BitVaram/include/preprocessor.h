@@ -1,9 +1,8 @@
 #ifndef PREPROCESSOR_H
 #define PREPROCESSOR_H
 
-#include "context.h"
-#include "config.h"
-
+#include <context.h>
+#include <config.h>
 #include <string>
 
 namespace compiler {
@@ -25,9 +24,9 @@ namespace compiler {
 			// define directives and so on
 		};
 	private:
-		State state;
-		Position pos;
 		Context context;
+		Position pos;
+		State state;
 
 		void solveSingleComment(std::string& line);
 		void solveMultiCommentOpening(std::string& line);
@@ -41,7 +40,7 @@ namespace compiler {
 
 		State checkState(const std::string& line);
 		void occureErrorStateSwitch(State last, State next, const std::string& line);
-		void occureFinishState();
+		void occureFinishState(varam::Config& config);
 
 	public:
 		Preprocessor() : context(), state(State::pass), pos() {};
@@ -49,7 +48,7 @@ namespace compiler {
 
 		static std::string replacedPrefixName(const std::string& filename);
 
-		void process(const varam::Config& config);
+		void process(varam::Config& config);
 
 		const Context& getContext() const;
 	};

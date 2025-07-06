@@ -1,7 +1,5 @@
-#include "preprocessor.h"
-#include "common.hpp"
-
-#include <future>
+#include <preprocessor.h>
+#include <common.hpp>
 #include <fstream>
 #include <cstring>
 
@@ -123,11 +121,15 @@ void Preprocessor::occureErrorStateSwitch(State last, State next, const std::str
 	}
 }
 
-void Preprocessor::occureFinishState() {
+void Preprocessor::occureFinishState(varam::Config& config) {
 	this->context.setStatus(Status::Finished);
+
+	const std::string filename = config.getInputFile();
+	const std::string preprocessedFileName = this->replacedPrefixName(filename);
+	config.set("input", preprocessedFileName);
 }
 
-void Preprocessor::process(const varam::Config& config) {
+void Preprocessor::process(varam::Config& config) {
 	this->context.setPhase(Phase::Preprocessing);
 	this->context.setStatus(Status::Started);
 
@@ -183,7 +185,7 @@ void Preprocessor::process(const varam::Config& config) {
 	sourceFile.close();
 	preprocessedFile.close();
 
-	this->occureFinishState();
+	this->occureFinishState(config);
 }
 
 const Context& Preprocessor::getContext() const {

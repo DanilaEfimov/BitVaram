@@ -1,25 +1,15 @@
-Функциональная модель BitVaram включает в себя следующие механизмы:
+The BitVaram functional model includes the following parts:
 
-## Глобальное определение
+Global Definition
+A key feature of the language is that you can define functions during the program’s runtime.
+Global definitions are stored in environment.bv. The compiler uses these definitions. While the program runs, a special structure keeps track of functions defined at runtime. When the program calls a new global function, it looks it up in this structure. After the program finishes, new definitions are added to environment.bv. Overloading is not supported — if a function is already globally defined, it will be replaced permanently after the program ends. If two functions with the same name exist during execution, the one defined later is used.
 
----
+There is also a way to "undefine" global functions.
+As mentioned before, global definitions are stored in environment.bv. The compiler creates an output file in IR language that the virtual machine uses to start. When the program runs and sees an undefine directive, it checks the function definition. If there are two functions with the same name, the later one is used. If the function doesn’t exist, the directive is ignored.
 
-#Ключевой особенностью языка является возможность определить функцию на уровне языка во время выполнения программы.
-Глобальные определения хранятся в environment.bv. Эти определения используются компилятором. Во время выполнения программы создается специальная структура для хранения функций, определенных в runtime. При обращении к новым глобально определенным функциям эта структура также используется для поиска определений. После завершения программы новые определения добавляются в environment.bv. Перегрузки не поддерживаются - если глобально определена функция, хранящаяся в окружении BitVaram, то она переопределяется безвозвратно после завершения программы. Если во время выполнения имеется две функции с одинаковыми именами, приоритет отдается той, что позже определена.
+The local definition mechanism works in the usual way.
 
----
+For local undefinition, the same kind of structure is used that stores runtime global definitions. The difference is that when the program ends, functions defined locally are not saved.
 
-#Для глобального определения имеется обратным механизм глобального разопределения.
-Как было сказано ранее, глобальные определения хранятся в environment.bv. Компилятором создается выходной файл на языке IR, которым инициализируется виртуальная машина. Во время выполнения при обнаружения директивы разопределения проверяется определения функции. Если во время выполнения имеется две функции с одинаковыми именами, приоритет отдается той, что позже определена. При обнаружении неопределенной функции директива пропускается.
-
----
-
-*Механизм (локального) определения реализован традиционно*
-
-Для реализации (локального) разопределения используется такая же специальная структура, в которой хранятся runtime global определения. Единственное отличие в том, что при завершении программы не учитываются функции, определенные "здесь".
-
----
-
-##Параметры функций
-
-*Механизм передачи параметров реализован традиционно, тривиально*
+Function Parameters
+The way parameters are passed to functions is standard and simple.

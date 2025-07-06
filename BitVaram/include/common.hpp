@@ -14,16 +14,20 @@ namespace varam {
 
 		// preprocessing
 		missedCommentClosing,
-		missedCommentOpening
+		missedCommentOpening,
+
+		// parser
+		undefinedIdentifer
 	};
 
 	using hint = string;
-	using errorKey = pair<const error, const hint>;
+	using errorKey = pair<error, hint>;
 
-	map<const error, const hint> messages = {
+	inline map<error, hint> messages = {
 		errorKey(failedtoOpenFile, "failed to open file"),
 		errorKey(missedCommentClosing, "missing closing multilines comment pattern"),
-		errorKey(missedCommentOpening, "missing opening multilines comment pattern")
+		errorKey(missedCommentOpening, "missing opening multilines comment pattern"),
+		errorKey(undefinedIdentifer, "undefined identifier")
 	};
 
 };	// namespace varam
