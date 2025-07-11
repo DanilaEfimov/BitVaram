@@ -11,6 +11,7 @@ namespace varam {
 	enum error {
 		// general
 		failedtoOpenFile,
+		failedtoReadAll,
 
 		// preprocessing
 		missedCommentClosing,

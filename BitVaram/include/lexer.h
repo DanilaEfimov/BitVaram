@@ -18,16 +18,19 @@ namespace compiler {
 		Context context;
 		Position pos;
 
+		void trim(std::string& line, size_t& col);
+		void split(std::string& line, expression& seq, Position pos);
+
 	public:
-		explicit Lexer(const varam::Config& config) {};
+		explicit Lexer() {};
 		~Lexer() = default;
 
-		std::string trimmed(const std::string& line);
-		void split(std::string& line, std::vector<key>& seq);
-
 		void process(varam::Config& config);
+
+		const std::vector<expression>& getExpressions() const;
+		const Context& getContext() const;
 	};
 
-}
+}	// namespace compiler
 
-#endif
+#endif	// LEXER_H

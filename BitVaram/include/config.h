@@ -31,6 +31,8 @@ namespace varam {
         ConfigData* data;
 
         void parse(int argc, char* argv[]);
+
+        void updateData();
     };
 
 } // namespace varam

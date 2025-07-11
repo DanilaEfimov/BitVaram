@@ -82,3 +82,7 @@ std::string varam::Config::getInputFile() const
 {
 	return this->data->inputFile;
 }
+
+void varam::Config::updateData() {
+    this->data->init(this->vm);
+}

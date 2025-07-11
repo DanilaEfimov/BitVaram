@@ -20,38 +20,11 @@ namespace compiler {
 	struct LangFrame {
 		using key = std::string;
 	private:
-		const std::set<key> keywords = {
-			"coredef",		// coredef [function definition]
-			"coreundef",	// coreundef [function identifier]
-			"curdef",		// curdef [function definition] / [variable definition] [=] [number]
-			"curundef",		// curundef [functtion identifier] / [variable identifier] [=] [number]
-			"defined",		// defined [identifier]
-			"if",			// if [variable identifier]
-			"for",			// for [variable identifier]
-			"store",		// store [identifier], [value]
-			"show",			// show {prints all from registry}
-			"and",			// [identifier] and [identifier]
-			"or",			// [identifier] or [identifier]
-			"xor",			// [identifier] xor [identifier]
-			"sup",			// sup [(] {separated identifiers} [)]
-			"inf",			// inf [(] {separated identifiers} [)]
-			"return",		// return [identifier]
-			"exit"			// exit [number]
-		};
+		static const std::set<key> keywords;
 		
-		const std::set<key> operators = {
-			"(", ")",
-			"=",
-			"+",
-			"-",
-			"*",
-			"/",
-			"~"
-		};
+		static const std::set<key> operators;
 
-		const std::set<key> separators = {
-			","
-		};
+		static const std::set<key> separators;
 
 		bool isNumber(const std::string& word) const {
 			try {

@@ -1,3 +1,6 @@
+#ifndef CONFIG_TPP
+#define CONFIG_TPP
+
 template<typename T>
 T varam::Config::get(const std::string& key) const noexcept(false)
 {
@@ -11,8 +14,11 @@ template<typename T>
 void varam::Config::set(const std::string& key, const T& value) noexcept(false) {
     if (this->vm.count(key)) {
         this->vm.at(key).value() = value;
+        this->updateData();
     }
     else {
         throw std::runtime_error("Missing option: " + key);
     }
 }
+
+#endif
