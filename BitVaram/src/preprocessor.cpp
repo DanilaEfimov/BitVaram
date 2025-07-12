@@ -176,8 +176,10 @@ void Preprocessor::process(varam::Config& config) {
 			break;
 		}
 
-		preprocessedFile << line << std::endl;
-		this->pos.line++;  
+		if (!line.empty()) {
+			preprocessedFile << line << std::endl;
+		}
+			this->pos.line++;  
 	}
 
 	finish:

@@ -3,7 +3,7 @@ project(BitVaram LANGUAGES CXX)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("E:/libraries/boost_1_87_0")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/detail") #for templates
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/detail") #for templates and structures
 
 link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
@@ -19,4 +19,4 @@ endif()
 
 target_link_libraries(BitVaram PRIVATE libboost_program_options-vc143-mt-gd-x64-1_87)
 target_link_libraries(BitVaram PRIVATE libboost_regex-vc143-mt-gd-x64-1_87)
-
+target_link_libraries(BitVaram PRIVATE libboost_json-vc143-mt-gd-x64-1_87)

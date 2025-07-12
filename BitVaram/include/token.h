@@ -13,7 +13,7 @@ namespace compiler {
 		KEYWORD,
 		IDENTIFIER,
 		OPERATOR,	// =, +, -, *, /
-		NUMBER,
+		NUMBER,		// no more literal types
 		SEPARATOR
 	};
 

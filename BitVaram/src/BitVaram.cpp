@@ -20,13 +20,6 @@ int main(int argc, char* argv[]) {
     context = lexer.getContext();
     auto code = lexer.getExpressions();
 
-    for (auto& expression : code) {
-        for (auto& token : expression) {
-            std::cout << token.getValue() << " "
-                << std::string(token.getPosition()) << std::endl;
-        }
-    }
-
     for (auto& error : context.getErrors()) {
         context.getLogger().log(Level::Warning, error.message, error.position);
     }

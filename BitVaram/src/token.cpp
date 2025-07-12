@@ -23,6 +23,8 @@ const std::set<LangFrame::key> LangFrame::keywords = {
 
 const std::set<LangFrame::key> LangFrame::operators = {
 			"(", ")",
+			"[", "]",
+			"{", "}",
 			"=",
 			"+",
 			"-",
