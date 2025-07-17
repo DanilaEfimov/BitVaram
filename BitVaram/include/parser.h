@@ -21,11 +21,14 @@ namespace compiler {
 			Cycle,
 			Undeclaration,
 			Assignment,
+			UnarExpr,
 			BinaryExpr,
 			FunctionCall,
 			Return,
 			SystemCall
 		};
+
+		static const std::set<Statemate> primes;
 
 	private:
 		mutable Context context;
@@ -38,14 +41,17 @@ namespace compiler {
 		Statemate getKeywordBasedType(const Expression& expr) const;
 		Statemate getType(const Expression& expr) const;
 
-		statemates::ASTnode* buildAST(const std::vector<Expression>& expressions,
-			statemates::ASTnode* curRoot);
-		statemates::ASTnode* buildASTNil(const Expression& expression,
-										statemates::ASTnode* parent);
+		inline bool isASTNil(Statemate type) const;
 
-		int getBlockBound(const std::vector<Expression>& expressions, int start);
-		statemates::ASTnode* buildStatemate(const std::vector<Expression>& expressions,
-											statemates::ASTnode* parent, Statemate type,
+		statemates::ASTnode* buildAST(const std::vector<Expression>& expressions,
+											statemates::ASTnode* curRoot,
+											int start, int end);
+		statemates::statemate* buildASTNil(const Expression& expression,
+											Statemate type);
+
+		int getStatemateBound(const std::vector<Expression>& expressions, Statemate type, int start);
+		statemates::statemate* buildStatemate(const std::vector<Expression>& expressions,
+											Statemate type,
 											int start, int end);
 
 		void occureUndefinedStatemate(const Expression& expr) const;
@@ -58,6 +64,35 @@ namespace compiler {
 		void process(const std::vector<Expression>& expressions, varam::Config& config);
 
 		const Context& getContext() const;
+
+	protected:
+
+		// prime statemates
+
+		statemates::statemate* makeAssigment(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
+		statemates::statemate* makeFunctionCall(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
+		statemates::statemate* makeReturn(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
+		statemates::statemate* makeSystemCall(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
+		statemates::statemate* makeUndeclaration(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
+		statemates::statemate* makeUnarExpr(const std::vector<Expression>& expressions,
+											Statemate type,
+											int start, int end);
+
 	};
 
 }	// namespace compiler

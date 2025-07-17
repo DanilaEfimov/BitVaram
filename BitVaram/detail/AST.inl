@@ -31,7 +31,7 @@ namespace compiler::statemates {	// CXX17+ relational namespace declaration
 		virtual const object& toJson() const override {
 			this->obj.clear();
 
-			this->obj[TYPE] = "operator";
+			this->obj[TYPE] = "block";
 			this->obj["is_internal"] = this->isinternal;
 			this->obj["operators"] = this->operators;
 			this->obj["symbols"] = this->localSymbols;
@@ -158,6 +158,25 @@ namespace compiler::statemates {	// CXX17+ relational namespace declaration
 		}
 	};
 
+	struct StUnarExpression : statemate {
+		std::string op;							// "~", ""
+		std::string identifier;
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "unarop";
+			this->obj["operator"] = this->op;
+			this->obj["identifier"] = this->identifier;
+
+			return this->obj;
+		}
+	};
+
 	struct StBinaryExpression : statemate {
 		std::string op;							// "+", "-", "*", "/"
 		std::string left;						// lvalue identifier
@@ -239,6 +258,10 @@ namespace compiler::statemates {	// CXX17+ relational namespace declaration
 		std::vector<ASTnode*> childs = {};
 
 		statemate* statemate;
+
+		void append(ASTnode* child) {
+			this->childs.push_back(child);
+		}
 
 		explicit ASTnode(ASTnode* parent)
 			: parent(parent), childs(), statemate(nullptr) {};

@@ -1,71 +1,31 @@
 #include <parser.h>
+#include <statemate.inl>
 #include <iostream>
 
 using namespace varam;
 using namespace compiler;
 
-/*
-Функция buildAST(список выражений, текущая вершина):
 
-    для каждого выражения в списке:
-        тип = getType(выражение)
-
-        если тип == VariableDeclaration:
-            создать StVariableDeclaration node
-            node.identifier = выражение.имя
-            node.expression = выражение.значение
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == Assignment:
-            создать StAssignment node
-            node.identifier = выражение.имя
-            node.expression = выражение.значение
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == FunctionDeclaration:
-            создать StFunctionDeclaration node
-            node.name = выражение.имя
-            node.parameters = выражение.параметры
-            node.isglobal = выражение.глобальность
-            создать новую вершину bodyNode для тела функции
-            buildAST(выражение.тело, bodyNode)
-            node.body = содержимое bodyNode
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == Condition:
-            создать StConditionBlock node
-            node.expression = выражение.условие
-            buildAST(выражение.trueBranch, node.trueBranch)
-            buildAST(выражение.falseBranch, node.falseBranch)
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == Cycle:
-            создать StCycle node
-            node.parameterIdentifier = выражение.итератор
-            buildAST(выражение.тело, node.body)
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == FunctionCall:
-            создать StFunctionCall node
-            node.name = выражение.имя
-            node.arguments = выражение.аргументы
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе если тип == BinaryExpression:
-            создать StBinaryExpression node
-            node.op = выражение.оператор
-            node.left = выражение.лево
-            node.right = выражение.право
-            обернуть node в ASTnode и добавить к текущей вершине
-
-        иначе:
-            вывести ошибку "Неизвестный тип выражения"
-*/
+const std::set<Parser::Statemate> Parser::primes = {   // statemates, which cannot have child in AST
+    Statemate::Assignment,
+    Statemate::FunctionCall,
+    Statemate::Return,
+    Statemate::SystemCall,
+    Statemate::Undeclaration,
+    Statemate::UnarExpr
+};
 
 Parser::Statemate Parser::getOperatorBasedType(const Expression& expr) const {
+    std::string header = expr[0].getValue();
+    if (expr.size() == 2) {
+        TokenType type = expr[1].getType();
+        if (header == NOT && type == TokenType::IDENTIFIER) 
+            { return Statemate::UnarExpr; }
+    }
+
     if (expr.size() == 1) {
-        std::string header = expr[0].getValue();
-        if (LangFrame::isOpening(header)) { return Statemate::Block; }
+        if (LangFrame::isOpening(header)) 
+            { return Statemate::Block; }
     }
     this->occureUndefinedStatemate(expr);
 }
@@ -130,27 +90,50 @@ Parser::Statemate Parser::getType(const Expression& expr) const {
     this->occureUndefinedStatemate(expr);
 }
 
-statemates::ASTnode* Parser::buildAST(const std::vector<Expression>& expressions,
-	statemates::ASTnode* curRoot) {
-    if (expressions.size() == 1) {  // terminal branch
-        return this->buildASTNil(expressions[0], curRoot);
+inline bool Parser::isASTNil(Statemate type) const {
+    return Parser::primes.contains(type);
+}
+
+statemates::ASTnode* Parser::buildAST(
+    const std::vector<Expression>& expressions, // source tokenized code
+	statemates::ASTnode* curRoot,               // current AST root
+    int start, int end) {                       // start & end of scope
+    if (end - start == 1) {  
+        // terminal branch
+        // every prime statemate have be writen in one line
+        Statemate type = this->getType(expressions[0]);
+        statemates::ASTnode* child = new statemates::ASTnode(curRoot);
+        child->statemate = this->buildStatemate(expressions, type, 0, 0);
+        return child;
     }
 
-    for (int i = 0; i < expressions.size(); i++) {
-        Statemate type = this->getType(expressions[i]);
-        int end = this->getBlockBound(expressions, i);
+    for (int i = start; i < end; i++) {  // reccursion branch
         
+        Statemate type = this->getType(expressions[i]);
+        int closing = this->getStatemateBound(expressions, type, i);
+
+        // building AST node
+        statemates::ASTnode* child = this->buildAST(expressions, curRoot, i, closing + 1);
+        child->statemate = this->buildStatemate(expressions, type, i, closing);
+        curRoot->append(child);
+
+        i = closing;
     }
+
     return curRoot;
 }
 
-statemates::ASTnode* Parser::buildASTNil(const Expression& expression,
-    statemates::ASTnode* parent) {
-    Statemate type = this->getType(expression);
+statemates::statemate* Parser::buildASTNil(
+    const Expression& expression,
+    Statemate type) {
     return nullptr;
 }
 
-int Parser::getBlockBound(const std::vector<Expression>& expressions, int start) {
+int Parser::getStatemateBound(const std::vector<Expression>& expressions, Statemate type, int start) {
+    if (this->isASTNil(type)) {
+        return start;
+    }
+
     if (expressions[start][0].getValue() != BLOCK_OPEN_BRACKET) {
         this->occureMissedSymbol(expressions[start][0], BLOCK_OPEN_BRACKET);
     }
@@ -169,13 +152,17 @@ int Parser::getBlockBound(const std::vector<Expression>& expressions, int start)
         }
     }
     
-    Token last = expressions.back().back();
+    Token last = expressions.back().back(); // last token in source
     this->occureMissedSymbol(last, BLOCK_CLOSE_BRACKET);
 }
 
-statemates::ASTnode* Parser::buildStatemate(const std::vector<Expression>& expressions,
-    statemates::ASTnode* parent, Statemate type,
+statemates::statemate* Parser::buildStatemate(
+    const std::vector<Expression>& expressions,
+    Statemate type,
     int start, int end) {
+    if (this->isASTNil(type)) {
+        return this->buildASTNil(expressions[start], type);
+    }
     return nullptr;
 }
 
@@ -202,7 +189,8 @@ void Parser::process(const std::vector<Expression>& expressions, varam::Config& 
 	this->tree = AST(nullptr);
 
     try {
-        this->buildAST(expressions, this->tree.getRoot());
+        // default calling with all-scope args
+        this->buildAST(expressions, this->tree.getRoot(), 0, expressions.size());
     }
     catch (std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
@@ -211,4 +199,42 @@ void Parser::process(const std::vector<Expression>& expressions, varam::Config& 
 
 const Context& Parser::getContext() const {
     return this->context;
+}
+
+// prime statemates
+
+statemates::statemate* Parser::makeAssigment(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
+}
+
+statemates::statemate* Parser::makeFunctionCall(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
+}
+
+statemates::statemate* Parser::makeReturn(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
+}
+
+statemates::statemate* Parser::makeSystemCall(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
+}
+
+statemates::statemate* Parser::makeUndeclaration(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
+}
+
+statemates::statemate* Parser::makeUnarExpr(const std::vector<Expression>& expressions,
+    Statemate type,
+    int start, int end) {
+    return nullptr;
 }
