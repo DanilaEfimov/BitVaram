@@ -5,6 +5,7 @@
 #include <config.h>
 #include <lexer.h>
 #include <common.hpp>
+#include <AST.h>
 
 namespace compiler {
 
@@ -18,18 +19,37 @@ namespace compiler {
 			FunctionDeclaration,
 			VariableDeclaration,
 			Cycle,
-			Undeclaration
+			Undeclaration,
+			Assignment,
+			BinaryExpr,
+			FunctionCall,
+			Return,
+			SystemCall
 		};
 
 	private:
-		Context context;
+		mutable Context context;
 		Position pos;
 
+		AST tree;
+
+		Statemate getOperatorBasedType(const Expression& expr) const;
+		Statemate getIdentiferBasedType(const Expression& expr) const;
+		Statemate getKeywordBasedType(const Expression& expr) const;
+		Statemate getType(const Expression& expr) const;
+
+		statemates::ASTnode* buildAST(const std::vector<Expression>& expressions,
+			statemates::ASTnode* curRoot);
+
+		void occureUndefinedStatemate(const Expression& expr) const;
+
 	public:
-		Parser() = default;
-		~Parser() = default;
+		Parser() : context(), pos(), tree(nullptr){};
+		~Parser() {};
 
 		void process(const std::vector<Expression>& expressions, varam::Config& config);
+
+		const Context& getContext() const;
 	};
 
 }	// namespace compiler

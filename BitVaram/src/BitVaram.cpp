@@ -24,5 +24,19 @@ int main(int argc, char* argv[]) {
         context.getLogger().log(Level::Warning, error.message, error.position);
     }
 
+    Parser parser;
+    parser.process(code, config);
+    context = parser.getContext();
+
+    bool fatal = false;
+    for (auto& error : context.getErrors()) {
+        context.getLogger().log(Level::Error, error.message, error.position);
+        fatal = true;
+    }
+
+    if (fatal) {
+        std::exit(EXIT_FAILURE);    // system calling
+    }
+
     return 0;
 }

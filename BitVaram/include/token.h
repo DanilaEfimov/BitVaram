@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 
 namespace compiler {
 
@@ -25,6 +26,8 @@ namespace compiler {
 		static const std::set<key> operators;
 
 		static const std::set<key> separators;
+
+		static const std::map<key, key> borders;
 
 		bool isNumber(const std::string& word) const {
 			try {
@@ -53,6 +56,12 @@ namespace compiler {
 			}
 			return TokenType::IDENTIFIER;
 		}
+
+		static bool isBorders(const std::string& open,
+			const std::string& close);
+
+		static bool isOpening(const std::string& opening);
+		static bool isClosing(const std::string& closing);
 	};
 
 	class Token {

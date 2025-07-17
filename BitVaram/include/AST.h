@@ -7,16 +7,18 @@ namespace compiler {
 
 	class AST {
 	private:
-		statemates::StBlock main;
+		statemates::ASTnode* root = nullptr;
 
 	public:
-		AST() = default;
-		~AST() = default;
+		explicit AST(statemates::ASTnode* node) : root(node) {};
+		virtual ~AST() { delete this->root; };
 
-		const statemates::StBlock& getMain() const { return this->main; }
-
+		statemates::ASTnode* getRoot() const {
+			return this->root;
+		};
+		boost::json::value toJson() const;
 	};
 
-}	// namespace compiler
+}
 
-#endif	// AST_H
+#endif

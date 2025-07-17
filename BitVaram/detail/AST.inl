@@ -139,6 +139,120 @@ namespace compiler::statemates {	// CXX17+ relational namespace declaration
 		}
 	};
 
+	struct StAssignment : statemate {
+		std::string identifier;
+		boost::json::array expression;	// array of tokens
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "assignment";
+			this->obj["identifier"] = this->identifier;
+			this->obj["expression"] = this->expression;
+
+			return this->obj;
+		}
+	};
+
+	struct StBinaryExpression : statemate {
+		std::string op;							// "+", "-", "*", "/"
+		std::string left;						// lvalue identifier
+		std::string right;						// rvalue identifier
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "binexpr";
+			this->obj["operator"] = this->op;
+			this->obj["left"] = this->left;
+			this->obj["right"] = this->right;
+
+			return this->obj;
+		}
+	};
+
+	struct StFunctionCall : statemate {
+		std::string name;
+		boost::json::array arguments;	// array of tokens
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "funccall";
+			this->obj["name"] = this->name;
+			this->obj["arguments"] = this->arguments;
+
+			return this->obj;
+		}
+	};
+
+	struct StReturn : statemate {
+		std::string identifier;
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "return";
+			this->obj["return_value"] = this->identifier;
+
+			return this->obj;
+		}
+	};
+
+	struct StSystemCall : statemate {
+		std::string name;
+		boost::json::array arguments;	// array of tokens
+
+	private:
+		mutable object obj;
+
+	public:
+		virtual const object& toJson() const override {
+			this->obj.clear();
+
+			this->obj[TYPE] = "syscall";
+			this->obj["name"] = this->name;
+			this->obj["arguments"] = this->arguments;
+
+			return this->obj;
+		}
+	};
+
+	struct ASTnode {
+		ASTnode* parent = nullptr;
+		std::vector<ASTnode*> childs = {};
+
+		statemate* statemate;
+
+		explicit ASTnode(ASTnode* parent)
+			: parent(parent), childs(), statemate(nullptr) {};
+
+		virtual ~ASTnode() {
+			if (this->parent) {
+				delete this->parent;
+				for (auto child : this->childs) {
+					delete child;
+				}
+			}
+		}
+	};
+
 }
 
 #endif

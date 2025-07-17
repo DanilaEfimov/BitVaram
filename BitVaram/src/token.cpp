@@ -1,41 +1,53 @@
 #include <token.h>
+#include <common.hpp>
 
 using namespace compiler;
 
 const std::set<LangFrame::key> LangFrame::keywords = {
-			"coredef",		// coredef [function definition]
-			"coreundef",	// coreundef [function identifier]
-			"curdef",		// curdef [function definition] / [variable definition] [=] [number]
-			"curundef",		// curundef [functtion identifier] / [variable identifier] [=] [number]
-			"defined",		// defined [identifier]
-			"if",			// if [variable identifier]
-			"for",			// for [variable identifier]
-			"store",		// store [identifier], [value]
-			"show",			// show {prints all from registry}
-			"and",			// [identifier] and [identifier]
-			"or",			// [identifier] or [identifier]
-			"xor",			// [identifier] xor [identifier]
-			"sup",			// sup [(] {separated identifiers} [)]
-			"inf",			// inf [(] {separated identifiers} [)]
-			"return",		// return [identifier]
-			"exit"			// exit [number]
+		COREDEF,		// coredef [function definition]
+		COREUNDEF,		// coreundef [function identifier]
+		CURDEF,			// curdef [function definition] / [variable definition] [=] [number]
+		CURUNDEF,		// curundef [function identifier] / [variable identifier] [=] [number]
+		DEFINED,		// defined [identifier]
+		IF,				// if [variable identifier]
+		FOR,			// for [variable identifier]
+		STORE,			// store [identifier], [value]
+		SHOW,			// show {prints all from registry}
+		AND,			// [identifier] and [identifier]
+		OR,				// [identifier] or [identifier]
+		XOR,			// [identifier] xor [identifier]
+		SUP,			// sup [(] {separated identifiers} [)]
+		INF,			// inf [(] {separated identifiers} [)]
+		RETURN,			// return [identifier]
+		EXIT			// exit [number]
 };
 
 const std::set<LangFrame::key> LangFrame::operators = {
-			"(", ")",
-			"[", "]",
-			"{", "}",
-			"=",
-			"+",
-			"-",
-			"*",
-			"/",
-			"~"
+		FUNC_OPEN_BRACKET,
+		FUNC_CLOSE_BRACKET,
+		BLOCK_OPEN_BRACKET,
+		BLOCK_CLOSE_BRACKET,
+		MULTY_ARG_FUNC_OPEN_BRACKET,
+		MULTY_ARG_FUNC_CLOSE_BRACKET,
+		EQUALS,
+		PLUS,
+		MINUS,
+		MUL,
+		DIV,
+		NOT,
+		LESS
 };
 
 const std::set<LangFrame::key> LangFrame::separators = {
-			","
+		COMMA
 };
+
+const std::map<LangFrame::key, LangFrame::key> LangFrame::borders = {
+		{FUNC_OPEN_BRACKET, FUNC_CLOSE_BRACKET},
+		{BLOCK_OPEN_BRACKET, BLOCK_CLOSE_BRACKET},
+		{MULTY_ARG_FUNC_OPEN_BRACKET, MULTY_ARG_FUNC_CLOSE_BRACKET}
+};
+
 
 Token::Token(const std::string& word, const Position& pos) {
 	LangFrame lang;
@@ -65,4 +77,25 @@ Position Token::getPosition() const {
 
 TokenType Token::checkWord(const std::string& word, const LangFrame& lang) {
 	return lang.checkLangContext(word);
+}
+
+bool LangFrame::isBorders(const std::string& open,
+	const std::string& close) {
+	if (LangFrame::borders.count(open)) {
+		return LangFrame::borders.at(open) == close;
+	}
+	return false;
+}
+
+bool LangFrame::isOpening(const std::string& opening) {
+	return LangFrame::borders.contains(opening);
+}
+
+bool LangFrame::isClosing(const std::string& closing) {
+	for (auto& p : LangFrame::borders) {
+		if (p.second == closing) {
+			return true;
+		}
+	}
+	return false;
 }
