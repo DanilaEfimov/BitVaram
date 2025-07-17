@@ -40,8 +40,16 @@ namespace compiler {
 
 		statemates::ASTnode* buildAST(const std::vector<Expression>& expressions,
 			statemates::ASTnode* curRoot);
+		statemates::ASTnode* buildASTNil(const Expression& expression,
+										statemates::ASTnode* parent);
+
+		int getBlockBound(const std::vector<Expression>& expressions, int start);
+		statemates::ASTnode* buildStatemate(const std::vector<Expression>& expressions,
+											statemates::ASTnode* parent, Statemate type,
+											int start, int end);
 
 		void occureUndefinedStatemate(const Expression& expr) const;
+		void occureMissedSymbol(const Token& token, std::string expected) const;
 
 	public:
 		Parser() : context(), pos(), tree(nullptr){};

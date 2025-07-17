@@ -51,8 +51,7 @@ namespace varam {
 		missedCommentOpening,
 
 		// parser
-		missedBlockClosing,
-		missedBlockOpening,
+		missingSymbol,
 		invalidSyntax
 	};
 
@@ -63,8 +62,7 @@ namespace varam {
 		errorKey(failedtoOpenFile, "failed to open file"),
 		errorKey(missedCommentClosing, "missing closing multilines comment pattern"),
 		errorKey(missedCommentOpening, "missing opening multilines comment pattern"),
-		errorKey(missedBlockClosing, "missing closing operator pattern"),
-		errorKey(missedBlockOpening, "missing opening operator pattern"),
+		errorKey(missingSymbol, "missing symbol"),
 		errorKey(invalidSyntax, "invalid syntax, undefined statemate")
 	};
 

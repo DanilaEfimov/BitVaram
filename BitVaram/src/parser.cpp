@@ -63,7 +63,10 @@ using namespace compiler;
 */
 
 Parser::Statemate Parser::getOperatorBasedType(const Expression& expr) const {
-    return Statemate::Block;
+    if (expr.size() == 1) {
+        std::string header = expr[0].getValue();
+        if (LangFrame::isOpening(header)) { return Statemate::Block; }
+    }
     this->occureUndefinedStatemate(expr);
 }
 
@@ -129,12 +132,51 @@ Parser::Statemate Parser::getType(const Expression& expr) const {
 
 statemates::ASTnode* Parser::buildAST(const std::vector<Expression>& expressions,
 	statemates::ASTnode* curRoot) {
+    if (expressions.size() == 1) {  // terminal branch
+        return this->buildASTNil(expressions[0], curRoot);
+    }
+
     for (int i = 0; i < expressions.size(); i++) {
         Statemate type = this->getType(expressions[i]);
-        // get statemate bounds
-        // build statemate node and append to curRoot.childs
+        int end = this->getBlockBound(expressions, i);
+        
     }
     return curRoot;
+}
+
+statemates::ASTnode* Parser::buildASTNil(const Expression& expression,
+    statemates::ASTnode* parent) {
+    Statemate type = this->getType(expression);
+    return nullptr;
+}
+
+int Parser::getBlockBound(const std::vector<Expression>& expressions, int start) {
+    if (expressions[start][0].getValue() != BLOCK_OPEN_BRACKET) {
+        this->occureMissedSymbol(expressions[start][0], BLOCK_OPEN_BRACKET);
+    }
+
+    int opened = 1;
+    for (int i = start + 1; i < expressions.size(); i++) {
+        std::string value = expressions[i][0].getValue();
+        if (opened == 1 && value == BLOCK_CLOSE_BRACKET) {
+            return i;
+        }
+        if (value == BLOCK_OPEN_BRACKET) {
+            opened++;
+        }
+        else if (value == BLOCK_CLOSE_BRACKET){
+            opened--;
+        }
+    }
+    
+    Token last = expressions.back().back();
+    this->occureMissedSymbol(last, BLOCK_CLOSE_BRACKET);
+}
+
+statemates::ASTnode* Parser::buildStatemate(const std::vector<Expression>& expressions,
+    statemates::ASTnode* parent, Statemate type,
+    int start, int end) {
+    return nullptr;
 }
 
 void Parser::occureUndefinedStatemate(const Expression& expr) const {
@@ -143,6 +185,14 @@ void Parser::occureUndefinedStatemate(const Expression& expr) const {
     this->context.addError(varam::messages[invalidSyntax], pos);
 
     throw std::runtime_error("invalid syntax, parsing aborted");
+}
+
+void Parser::occureMissedSymbol(const Token& token, std::string expected) const {
+    this->context.setStatus(Status::Aborted);
+    this->context.addError(varam::messages[missingSymbol] 
+        + " expected: '" + expected + "'", token.getPosition());
+
+    throw std::runtime_error("missing symbol, parsing aborted");
 }
 
 void Parser::process(const std::vector<Expression>& expressions, varam::Config& config) {
