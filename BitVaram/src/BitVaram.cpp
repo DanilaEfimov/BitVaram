@@ -5,7 +5,10 @@ using namespace compiler;
 
 int main(int argc, char* argv[]) {
 
-    Config config(argc, argv);
+    const char* fake_argv[] = { "sd", "-I", "source.bv" };
+    int fake_argc = 3;
+
+    Config config(fake_argc, const_cast<char**>(fake_argv));
 
     Preprocessor preprocessor;
     preprocessor.process(config);

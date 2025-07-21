@@ -14,7 +14,7 @@ namespace compiler {
 		using Expression = std::vector<Token>;
 
 		enum class Statemate {
-			Block,				// operator
+			Block,              // operator
 			Condition,
 			FunctionDeclaration,
 			VariableDeclaration,
@@ -27,6 +27,25 @@ namespace compiler {
 			Return,
 			SystemCall
 		};
+
+		inline constexpr std::string to_string(Statemate s) const {
+			switch (s) {
+				case Statemate::Block:					return "Block";
+				case Statemate::Condition:				return "Condition";
+				case Statemate::FunctionDeclaration:	return "FunctionDeclaration";
+				case Statemate::VariableDeclaration:	return "VariableDeclaration";
+				case Statemate::Cycle:					return "Cycle";
+				case Statemate::Undeclaration:			return "Undeclaration";
+				case Statemate::Assignment:				return "Assignment";
+				case Statemate::UnarExpr:				return "UnarExpr";
+				case Statemate::BinaryExpr:				return "BinaryExpr";
+				case Statemate::FunctionCall:			return "FunctionCall";
+				case Statemate::Return:					return "Return";
+				case Statemate::SystemCall:				return "SystemCall";
+			default:								return "Unknown";
+			}
+		}
+
 
 		static const std::set<Statemate> primes;
 
@@ -56,6 +75,7 @@ namespace compiler {
 
 		void occureUndefinedStatemate(const Expression& expr) const;
 		void occureMissedSymbol(const Token& token, std::string expected) const;
+		void occureInvalidSyntax(Position pos, Statemate type) const;
 
 	public:
 		Parser() : context(), pos(), tree(nullptr){};
@@ -69,29 +89,17 @@ namespace compiler {
 
 		// prime statemates
 
-		statemates::statemate* makeAssigment(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeAssigment(const Expression& expression);
 
-		statemates::statemate* makeFunctionCall(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeFunctionCall(const Expression& expression);
 
-		statemates::statemate* makeReturn(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeReturn(const Expression& expression);
 
-		statemates::statemate* makeSystemCall(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeSystemCall(const Expression& expression);
 
-		statemates::statemate* makeUndeclaration(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeUndeclaration(const Expression& expression);
 
-		statemates::statemate* makeUnarExpr(const std::vector<Expression>& expressions,
-											Statemate type,
-											int start, int end);
+		statemates::statemate* makeUnarExpr(const Expression& expression);
 
 	};
 
