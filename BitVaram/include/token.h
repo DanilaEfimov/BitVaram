@@ -27,6 +27,8 @@ namespace compiler {
 
 		static const std::set<key> separators;
 
+		static const std::set<key> systemCalls;
+
 		static const std::map<key, key> borders;
 
 		bool isNumber(const std::string& word) const {
@@ -59,6 +61,7 @@ namespace compiler {
 
 		static bool isBorders(const std::string& open,
 			const std::string& close);
+		static bool isSysCall(const std::string& value);
 
 		static bool isOpening(const std::string& opening);
 		static bool isClosing(const std::string& closing);

@@ -233,7 +233,8 @@ statemates::statemate* Parser::makeAssigment(const Expression& expression) {
         assignment->identifier = expression[0].getValue();
 
         if (tokensCount == 3    // identifier = identifier
-            && expression[2].getType() == TokenType::IDENTIFIER) { 
+            && (expression[2].getType() == TokenType::IDENTIFIER
+            || expression[2].getType()  == TokenType::NUMBER)) {
             
             assignment->expression = {expression[2].getValue()};
             return assignment;
@@ -276,8 +277,8 @@ statemates::statemate* Parser::makeFunctionCall(const Expression& expression) {
         && expression.back().getValue()     == FUNC_CLOSE_BRACKET) {
 
         boost::json::array args{};
-        for (int i = 2; i < tokensCount; i++) {
-            if (expression[i].getType()    == TokenType::IDENTIFIER
+        for (int i = 2; i < tokensCount - 1; i++) {
+            if (expression[i].getType()     == TokenType::IDENTIFIER
                 || expression[i].getType()  == TokenType::NUMBER) {
 
                 args.push_back(boost::json::value_from(expression[i].getValue()));
@@ -326,13 +327,50 @@ statemates::statemate* Parser::makeReturn(const Expression& expression) {
 }
 
 statemates::statemate* Parser::makeSystemCall(const Expression& expression) {
+    int tokensCount = expression.size();
+    statemates::StSystemCall* syscall = new statemates::StSystemCall();
+
+    if (tokensCount < 2) {
+        this->occureInvalidSyntax(expression[0].getPosition(), Statemate::Return);
+        goto fail;
+    }
+
+    
+
+    fail:
+    delete syscall;
     return nullptr;
 }
 
 statemates::statemate* Parser::makeUndeclaration(const Expression& expression) {
+    int tokensCount = expression.size();
+
+    if (tokensCount == 2) {
+        if (expression[0].getValue() == CURUNDEF 
+            || expression[0].getValue() == COREUNDEF
+            && expression[1].getType() == TokenType::IDENTIFIER) {
+            statemates::StUndeclaration* undeclaration = new statemates::StUndeclaration();
+            undeclaration->identifier = expression[1].getValue();
+            return undeclaration;
+        }
+    }
+
+    this->occureInvalidSyntax(expression[0].getPosition(), Statemate::Undeclaration);
     return nullptr;
 }
 
 statemates::statemate* Parser::makeUnarExpr(const Expression& expression) {
+    int tokensCount = expression.size();
+
+    if (tokensCount == 2) {
+        if (expression[0].getValue() == NOT
+            && expression[1].getType() == TokenType::IDENTIFIER) {
+            statemates::StUnarExpression* unarexpr = new statemates::StUnarExpression();
+            unarexpr->identifier = expression[1].getValue();
+            return unarexpr;
+        }
+    }
+
+    this->occureInvalidSyntax(expression[0].getPosition(), Statemate::UnarExpr);
     return nullptr;
 }
