@@ -15,7 +15,7 @@ namespace compiler {
 		IDENTIFIER,
 		OPERATOR,	// =, +, -, *, /
 		NUMBER,		// no more literal types
-		SEPARATOR
+		SEPARATOR,
 	};
 
 	struct LangFrame {

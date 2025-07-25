@@ -29,7 +29,10 @@ const std::set<LangFrame::key> LangFrame::operators = {
 		MUL,
 		DIV,
 		NOT,
-		LESS
+		LESS,
+		FUNC_OPEN_BRACKET, FUNC_CLOSE_BRACKET,
+		BLOCK_OPEN_BRACKET, BLOCK_CLOSE_BRACKET,
+		MULTY_ARG_FUNC_OPEN_BRACKET, MULTY_ARG_FUNC_CLOSE_BRACKET
 };
 
 const std::set<LangFrame::key> LangFrame::separators = {
