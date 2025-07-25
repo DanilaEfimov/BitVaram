@@ -16,7 +16,12 @@ namespace compiler {
 		statemates::ASTnode* getRoot() const {
 			return this->root;
 		};
-		boost::json::value toJson() const;
+		boost::json::object toJson() const {
+			if (this->root) {
+				return this->root->statemate->toJson();
+			}
+			return boost::json::object{};
+		}
 	};
 
 }

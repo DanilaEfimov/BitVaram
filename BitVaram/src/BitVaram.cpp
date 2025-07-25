@@ -5,7 +5,10 @@ using namespace compiler;
 
 int main(int argc, char* argv[]) {
 
-    Config config(argc, argv);
+    const char* fake_argv[] = { "sd", "-I", "source.bv" };
+    int fake_argc = 3;
+
+    Config config(fake_argc, const_cast<char**>(fake_argv));
 
     Preprocessor preprocessor;
     preprocessor.process(config);
@@ -22,20 +25,6 @@ int main(int argc, char* argv[]) {
 
     for (auto& error : context.getErrors()) {
         context.getLogger().log(Level::Warning, error.message, error.position);
-    }
-
-    Parser parser;
-    parser.process(code, config);
-    context = parser.getContext();
-
-    bool fatal = false;
-    for (auto& error : context.getErrors()) {
-        context.getLogger().log(Level::Error, error.message, error.position);
-        fatal = true;
-    }
-
-    if (fatal) {
-        std::exit(EXIT_FAILURE);    // system calling
     }
 
     return 0;

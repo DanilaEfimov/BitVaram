@@ -23,23 +23,25 @@ const std::set<LangFrame::key> LangFrame::keywords = {
 };
 
 const std::set<LangFrame::key> LangFrame::operators = {
-		FUNC_OPEN_BRACKET,
-		FUNC_CLOSE_BRACKET,
-		BLOCK_OPEN_BRACKET,
-		BLOCK_CLOSE_BRACKET,
-		MULTY_ARG_FUNC_OPEN_BRACKET,
-		MULTY_ARG_FUNC_CLOSE_BRACKET,
 		EQUALS,
 		PLUS,
 		MINUS,
 		MUL,
 		DIV,
 		NOT,
-		LESS
+		LESS,
+		FUNC_OPEN_BRACKET, FUNC_CLOSE_BRACKET,
+		BLOCK_OPEN_BRACKET, BLOCK_CLOSE_BRACKET,
+		MULTY_ARG_FUNC_OPEN_BRACKET, MULTY_ARG_FUNC_CLOSE_BRACKET
 };
 
 const std::set<LangFrame::key> LangFrame::separators = {
 		COMMA
+};
+
+const std::set<LangFrame::key> LangFrame::systemCalls = {
+	SHOW,
+	EXIT
 };
 
 const std::map<LangFrame::key, LangFrame::key> LangFrame::borders = {
@@ -86,6 +88,10 @@ bool LangFrame::isBorders(const std::string& open,
 	}
 	return false;
 }
+
+bool LangFrame::isSysCall(const std::string& value) {
+	return LangFrame::systemCalls.contains(value);
+};
 
 bool LangFrame::isOpening(const std::string& opening) {
 	return LangFrame::borders.contains(opening);
