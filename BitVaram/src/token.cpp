@@ -17,6 +17,7 @@ const std::set<LangFrame::key> LangFrame::keywords = {
 		OR,				// [identifier] or [identifier]
 		XOR,			// [identifier] xor [identifier]
 		SUP,			// sup [(] {separated identifiers} [)]
+		READ,			// [identifier] [=] read
 		INF,			// inf [(] {separated identifiers} [)]
 		RETURN,			// return [identifier]
 		EXIT			// exit [number]

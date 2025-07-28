@@ -18,6 +18,7 @@
 #define XOR			"xor"			// [identifier] xor [identifier]
 #define SUP			"sup"			// sup [(] {separated identifiers} [)]
 #define INF			"inf"			// inf [(] {separated identifiers} [)]
+#define READ		"read"			// [identifier] [=] read
 #define RETURN		"return"		// return [identifier]
 #define EXIT		"exit"			// exit [number]
 
@@ -45,6 +46,7 @@ namespace varam {
 		// general
 		failedtoOpenFile,
 		failedtoReadAll,
+		undefinedError,
 
 		// preprocessing
 		missedCommentClosing,
@@ -63,7 +65,8 @@ namespace varam {
 		errorKey(missedCommentClosing, "missing closing multilines comment pattern"),
 		errorKey(missedCommentOpening, "missing opening multilines comment pattern"),
 		errorKey(missingSymbol, "missing symbol"),
-		errorKey(invalidSyntax, "invalid syntax, undefined statemate")
+		errorKey(invalidSyntax, "invalid syntax, undefined statemate"),
+		errorKey(undefinedError, "undefined error")
 	};
 
 };	// namespace varam
