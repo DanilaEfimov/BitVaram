@@ -14,18 +14,13 @@ int main(int argc, char* argv[]) {
     preprocessor.process(config);
     Context context = preprocessor.getContext();
 
-    for (auto& error : context.getErrors()) {
-        context.getLogger().log(Level::Warning, error.message, error.position);
-    }
-
     Lexer lexer;
     lexer.process(config);
     context = lexer.getContext();
     auto code = lexer.getExpressions();
 
-    for (auto& error : context.getErrors()) {
-        context.getLogger().log(Level::Warning, error.message, error.position);
-    }
+    Parser parser;
+    parser.process(config, code);
 
     return 0;
 }

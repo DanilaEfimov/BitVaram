@@ -127,6 +127,10 @@ void Preprocessor::occureFinishState(varam::Config& config) {
 	const std::string filename = config.getInputFile();
 	const std::string preprocessedFileName = this->replacedPrefixName(filename);
 	config.set("input", preprocessedFileName);
+
+	for (auto& error : this->context.getErrors()) {
+		context.getLogger().log(Level::Warning, error.message, error.position);
+	}
 }
 
 void Preprocessor::process(varam::Config& config) {

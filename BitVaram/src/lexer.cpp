@@ -82,9 +82,12 @@ void Lexer::process(varam::Config& config) {
 	}
 
 	preprocessedFile.close();
+	for (auto& error : this->context.getErrors()) {
+		context.getLogger().log(Level::Warning, error.message, error.position);
+	}
 }
 
-const std::vector<Lexer::expression>& Lexer::getExpressions() const {
+const std::vector<expression>& Lexer::getExpressions() const {
 	return this->expressions;
 }
 

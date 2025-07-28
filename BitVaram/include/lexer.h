@@ -8,9 +8,10 @@
 
 namespace compiler {
 
+	using key = std::string;
+	using expression = std::vector<Token>;
+
 	class Lexer {
-		using key = std::string;
-		using expression = std::vector<Token>;
 
 	private:
 		std::vector<expression> expressions;
