@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
 
     Lexer lexer;
     lexer.process(config);
-    context = lexer.getContext();
     auto code = lexer.getExpressions();
 
     Parser parser;

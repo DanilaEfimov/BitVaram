@@ -48,8 +48,9 @@ namespace compiler::statemates {
 			if (expr.back().getType() == TokenType::IDENTIFIER) {
 				this->identifier = expr.back().getValue();
 
-				boost::json::array details = {};
-				for (const auto& token : expr) {
+				boost::json::array details = {};	// COMMING SOON
+				for (int i = 1; i < expr.size() - 1; i++) {
+					const auto token = expr[i];
 					if (token.getType() == TokenType::KEYWORD) {
 						details.push_back(boost::json::string(token.getValue()));
 					}
@@ -81,6 +82,29 @@ namespace compiler::statemates {
 			this->obj["qualifiers"] = this->qualifiers;
 
 			return this->obj;
+		}
+
+		static bool isValidSyntax(const expression& expr) noexcept {
+			if (expr.size() >= 2) {
+				std::string header = expr[0].getValue();
+				if (header == COREDEF || header == CURDEF
+					&& expr.back().getType() == TokenType::IDENTIFIER) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			int line = 0;
+			for (const auto& expr : source) {
+				if (statemates::identifier_decl::isValidSyntax(expr)) {
+					return line;
+				}
+				line++;
+			}
+
+			throw std::runtime_error("undeclaration::invalid syntax");
 		}
 
 	};	// identifier_decl
@@ -137,6 +161,33 @@ namespace compiler::statemates {
 			return this->obj;
 		}
 
+		static bool isValidSyntax(const expression& expr) noexcept {
+			if (expr.size() >= 2) {
+				std::string header = expr[0].getValue();
+				if (header == COREUNDEF || header == CURUNDEF
+					&& expr.back().getType() == TokenType::IDENTIFIER) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			int line = 0;
+			for (const auto& expr : source) {
+				if (expr.size() == 2) {
+					std::string header = expr[0].getValue();
+					if (header == COREUNDEF || header == CURUNDEF
+						&& expr[1].getType() == TokenType::IDENTIFIER) {
+						return line;
+					}
+				}
+				line++;
+			}
+
+			throw std::runtime_error("undeclaration::invalid syntax");
+		}
+
 	}; // undeclaration
 
 	struct keyword : statemate {
@@ -178,6 +229,27 @@ namespace compiler::statemates {
 			return this->obj;
 		}
 
+		static int isValidSyntax(const expression& expr) {
+			if (expr.size() == 1) {
+				if (expr[0].getType() == TokenType::KEYWORD) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			int line = 0;
+			for (const auto& expr : source) {
+				if (expr[0].getType() == TokenType::KEYWORD) {
+					return line;
+				}
+				line++;
+			}
+
+			throw std::runtime_error("keyword::invalid syntax");
+		}
+
 	};	// keyword
 
 	// ^^^ PRIME AST NODES / NON PRIME STATEMATES vvv
@@ -212,7 +284,34 @@ namespace compiler::statemates {
 			return this->obj;
 		}
 
+		static int getBlockBound(const std::vector<expression>& source) {
+			int opened = 0;
 
+			std::string header;
+			int line = 0;
+			for (const auto& expr : source) {
+				header = expr[0].getValue();
+				if (header == BLOCK_OPEN_BRACKET) {
+					opened++;
+				}
+				if (header == BLOCK_CLOSE_BRACKET) {
+					opened--;
+					if (opened == 0) {
+						return line;
+					}
+					if (opened < 0) {
+						throw std::runtime_error("block::missed opening block bracket");
+					}
+				}
+				line++;
+			}
+
+			throw std::runtime_error("block::missed closing block bracket");
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			return statemates::block::getBlockBound(source);
+		}
 
 	};	// block
 

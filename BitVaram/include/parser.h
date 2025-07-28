@@ -27,17 +27,19 @@ namespace compiler {
 
 		mutable Context context;
 
-		std::unique_ptr<statemates::block> ASTroot;
+		statemates::block* ASTroot;
 
-		StatemateType getType(std::vector<expression>& source, int start) const;
+		StatemateType getType(const expression& source) const;
 
-		int getBound(std::vector<expression>& source, int start) const;
+		int getBound(const std::vector<expression>& source, StatemateType type, int start) const;
 
 		std::unique_ptr<statemates::statemate> makeStatemate(statemates::block* parent,
 			StatemateType type, std::vector<expression>& code) const;
 
-		std::unique_ptr<statemates::block> buildAST(std::vector<expression>& code,
+		statemates::block* buildAST(std::vector<expression>& code,
 			statemates::block* root) const;
+
+		void occureSuccessState(varam::Config& config) const;
 
 	public:
 
