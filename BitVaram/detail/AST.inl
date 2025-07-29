@@ -8,7 +8,34 @@
 #include <lexer.h>
 #include <common.hpp>
 
+using namespace varam;
+
 namespace compiler::statemates {
+
+	enum class StatemateType {
+		Identifier_decl,
+		Undeclaration,
+		Keyword,
+		Block,
+		Function_decl,
+		System_call,
+		Assignment
+	};
+
+	struct statemate;
+	struct block;
+
+	inline StatemateType getType(const expression& expr);
+
+	inline std::unique_ptr<statemate> makeStatemate(
+		block* parent,
+		StatemateType type,
+		const std::vector<expression>& code
+	);
+
+	inline int getBound(const std::vector<expression>& source, StatemateType type, int start);
+
+	inline block* buildAST(const std::vector<expression>& code, block* root);
 
 	struct statemate {	// ast node
 
@@ -38,7 +65,7 @@ namespace compiler::statemates {
 
 		identifier_decl(parent_ptr parent = nullptr)
 			: statemate(parent), qualifiers(), identifier() {};
-		identifier_decl(parent_ptr parent, std::vector<expression>& source) {
+		identifier_decl(parent_ptr parent, const std::vector<expression>& source) {
 			if (source.empty()) {
 				throw std::invalid_argument("identifier_decl::source code is empty");
 			}
@@ -98,13 +125,13 @@ namespace compiler::statemates {
 		static int getStatemateBound(const std::vector<expression>& source) {
 			int line = 0;
 			for (const auto& expr : source) {
-				if (statemates::identifier_decl::isValidSyntax(expr)) {
+				if (identifier_decl::isValidSyntax(expr)) {
 					return line;
 				}
 				line++;
 			}
 
-			throw std::runtime_error("undeclaration::invalid syntax");
+			throw std::runtime_error("identifier_decl::invalid syntax");
 		}
 
 	};	// identifier_decl
@@ -116,9 +143,9 @@ namespace compiler::statemates {
 
 		undeclaration(parent_ptr parent = nullptr)
 			: statemate(parent), qualifiers(), identifier() {};
-		undeclaration(parent_ptr parent, std::vector<expression>& source) {
+		undeclaration(parent_ptr parent, const std::vector<expression>& source) {
 			if (source.empty()) {
-				throw std::invalid_argument("identifier_decl::source code is empty");
+				throw std::invalid_argument("undeclaration::source code is empty");
 			}
 
 			this->root = parent;
@@ -196,14 +223,14 @@ namespace compiler::statemates {
 
 		keyword(parent_ptr parent = nullptr)
 			: statemate(parent), word() {};
-		keyword(parent_ptr parent, std::vector<expression>& source) {
+		keyword(parent_ptr parent, const std::vector<expression>& source) {
 			if (source.empty()) {
-				throw std::invalid_argument("identifier_decl::source code is empty");
+				throw std::invalid_argument("keyword::source code is empty");
 			}
 
 			this->root = parent;
 			expression expr = source[0];
-			if (expr[0].getType() == TokenType::KEYWORD) {
+			if (keyword::isValidSyntax(expr)) {
 				this->word = expr[0].getValue();
 			}
 			else {
@@ -241,7 +268,7 @@ namespace compiler::statemates {
 		static int getStatemateBound(const std::vector<expression>& source) {
 			int line = 0;
 			for (const auto& expr : source) {
-				if (expr[0].getType() == TokenType::KEYWORD) {
+				if (keyword::isValidSyntax(expr)) {
 					return line;
 				}
 				line++;
@@ -252,6 +279,85 @@ namespace compiler::statemates {
 
 	};	// keyword
 
+	struct system_call : keyword {
+
+		boost::json::array params;
+
+		system_call(parent_ptr parent = nullptr)
+			: keyword(parent), params() {};
+		system_call(parent_ptr parent,const std::vector<expression>& source) {
+			if (source.empty()) {
+				throw std::invalid_argument("system_call::source code is empty");
+			}
+
+			this->root = parent;
+			expression expr = source[0];
+			if (expr[0].getType() == TokenType::KEYWORD) {
+				this->word = expr[0].getValue();
+			}
+
+			boost::json::array args = {};
+			for (int i = 1; i < expr.size(); i++) {
+				if (expr[i].getType() == TokenType::IDENTIFIER ||
+					expr[i].getType() == TokenType::NUMBER) {
+					args.push_back(boost::json::string(expr[i].getValue()));
+				}
+				else {
+					throw std::runtime_error("system_call::unexpected lexema");
+				}
+			}
+			this->params = args;
+		};
+		virtual ~system_call() = default;
+
+		virtual bool isNil() const {
+			return false;
+		}
+
+		virtual const char* name() const {
+			return "system_call";
+		}
+
+		virtual const boost::json::object& toJson() const {
+			this->obj.clear();
+
+			this->obj["type"] = this->name();
+			this->obj["word"] = this->word;
+			this->obj["parameters"] = this->params;
+
+			return this->obj;
+		}
+
+		static int isValidSyntax(const expression& expr) {
+			if (expr.size() > 1 &&
+				expr[0].getType() == TokenType::KEYWORD) {
+				TokenType type;
+				for (int i = 1; i < expr.size(); i++) {
+					type = expr[i].getType();
+					if (type != TokenType::IDENTIFIER &&
+						type != TokenType::NUMBER) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			int line = 0;
+			for (const auto& expr : source) {
+				if (system_call::isValidSyntax(expr)) {
+					return line;
+				}
+				line++;
+			}
+
+			throw std::runtime_error("system_call::invalid syntax");
+		}
+
+	};	// system_call
+
 	// ^^^ PRIME AST NODES / NON PRIME STATEMATES vvv
 
 	struct block : statemate {
@@ -260,6 +366,37 @@ namespace compiler::statemates {
 
 		block(parent_ptr parent = nullptr)
 			: statemate(parent), instructions() {};
+		block(parent_ptr parent, const std::vector<expression>& source) {
+			if (source.empty()) {
+				throw std::invalid_argument("block::source code is empty");
+			}
+
+			this->root = parent;
+			expression expr = source[0];
+			if (block::isValidSyntax(expr)) {
+				int end = block::getBlockBound(source);
+				std::vector<expression> code =
+					std::vector<expression>(source.begin(), source.begin() + end);
+				for (int i = 0; i < static_cast<int>(code.size());) {
+					StatemateType type = getType(code[i]);
+					int start = i;
+					int end = getBound(code, type, i) + 1;
+
+					if (start >= end) {
+						throw std::runtime_error("undefined error : bound searching crashed");
+						break;
+					}
+					std::vector<expression> source =
+						std::vector<expression>(code.begin() + start, code.begin() + end);
+
+					std::unique_ptr<statemate> child = makeStatemate(this, type, source);
+					this->instructions.push_back(std::move(child));
+
+					i = end;
+				}
+			}
+			throw std::runtime_error("block::invalid syntax : missed open bracket");
+		};
 		virtual ~block() = default;
 
 		virtual bool isNil() const {
@@ -309,8 +446,13 @@ namespace compiler::statemates {
 			throw std::runtime_error("block::missed closing block bracket");
 		}
 
+		static bool isValidSyntax(const expression& expr) {
+			return expr[0].getValue() == BLOCK_OPEN_BRACKET
+				&& expr.size() == 1;
+		}
+
 		static int getStatemateBound(const std::vector<expression>& source) {
-			return statemates::block::getBlockBound(source);
+			return block::getBlockBound(source);
 		}
 
 	};	// block
@@ -349,34 +491,6 @@ namespace compiler::statemates {
 
 	}; // function_decl
 
-	struct system_call : keyword {
-
-		boost::json::array params;
-
-		system_call(parent_ptr parent = nullptr)
-			: keyword(parent), params() {};
-		virtual ~system_call() = default;
-
-		virtual bool isNil() const {
-			return false;
-		}
-
-		virtual const char* name() const {
-			return "system_call";
-		}
-
-		virtual const boost::json::object& toJson() const {
-			this->obj.clear();
-
-			this->obj["type"] = this->name();
-			this->obj["word"] = this->word;
-			this->obj["parameters"] = this->params;
-
-			return this->obj;
-		}
-
-	};	// system_call
-
 	struct assignment : statemate {
 
 		std::string left;	// identifier only
@@ -406,6 +520,115 @@ namespace compiler::statemates {
 
 	};	// assignment
 
+	StatemateType getType(const expression& expr) {
+		if (statemates::identifier_decl::isValidSyntax(expr))
+			return StatemateType::Identifier_decl;
+		if (statemates::undeclaration::isValidSyntax(expr))
+			return StatemateType::Undeclaration;
+		if (statemates::keyword::isValidSyntax(expr))
+			return StatemateType::Keyword;
+		if (statemates::system_call::isValidSyntax(expr)) {
+			return StatemateType::System_call;
+		}
+		throw std::runtime_error("invalid syntax");
+	};
+
+	std::unique_ptr<statemate> makeStatemate(
+		block* parent,
+		StatemateType type,
+		const std::vector<expression>& code
+	) {
+		switch (type) {
+		case StatemateType::Identifier_decl:
+			return std::unique_ptr<statemate>
+				(new identifier_decl(parent, code));
+		case StatemateType::Undeclaration:
+			return std::unique_ptr<statemate>
+				(new undeclaration(parent, code));
+		case StatemateType::Keyword:
+			return std::unique_ptr<statemate>
+				(new keyword(parent, code));
+		case StatemateType::System_call:
+			return std::unique_ptr<statemate>
+				(new system_call(parent, code));
+		case StatemateType::Block:
+			return std::unique_ptr<statemate>
+				(new block(parent));
+		case StatemateType::Function_decl:
+			return std::unique_ptr<statemate>
+				(new function_decl(parent));
+		case StatemateType::Assignment:
+			return std::unique_ptr<statemate>
+				(new assignment(parent));
+		default:
+		{
+			return nullptr;
+		}
+		}
+	};
+
+	int getBound(const std::vector<expression>& source, StatemateType type, int start) {
+		std::vector<expression> code =
+			std::vector<expression>(source.begin() + start, source.end());
+		int end = start;
+		switch (type) {
+		case StatemateType::Identifier_decl:
+			end += identifier_decl::getStatemateBound(code);
+			break;
+		case StatemateType::Undeclaration:
+			end += undeclaration::getStatemateBound(code);
+			break;
+		case StatemateType::Keyword:
+			end += keyword::getStatemateBound(code);
+			break;
+		case StatemateType::System_call:
+			end += system_call::getStatemateBound(code);
+			break;
+		case StatemateType::Block:
+			end += block::getStatemateBound(code);
+			break;
+		case StatemateType::Function_decl:
+		case StatemateType::Assignment:
+		default:
+		{
+			return 0;
+		}
+		}
+
+		return end;
+	}
+
+	block* buildAST(
+		const std::vector<expression>& code,
+		block* root
+	) {
+
+		if (static_cast<int>(code.size()) == 0) {
+			return nullptr;
+		}
+
+		for (int i = 0; i < static_cast<int>(code.size());) {
+			StatemateType type = statemates::getType(code[i]);
+			int start = i;
+			int end = getBound(code, type, i) + 1;
+
+			if (start >= end) {
+				throw std::runtime_error("undefined error : bound searching crashed");
+				break;
+			}
+			std::vector<expression> source =
+				std::vector<expression>(code.begin() + start, code.begin() + end);
+
+			std::unique_ptr<statemate> child = makeStatemate(root, type, source);
+			root->instructions.push_back(std::move(child));
+
+			i = end;
+		}
+
+		return root;
+	}
+
 } // namespace statemates
+
 
 #endif
