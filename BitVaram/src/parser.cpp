@@ -70,8 +70,14 @@ void Parser::occureSuccessState(varam::Config& config) const {
         throw std::runtime_error("failed to save output");
     }
 
-    boost::json::object AST = this->ASTroot->toJson();
-    output << boost::json::serialize(AST);
+    if (this->ASTroot) {
+        boost::json::object AST = this->ASTroot->toJson();
+        output << boost::json::serialize(AST);
+    }
+    else {
+        output << boost::json::serialize(statemates::block().toJson());
+    }
+   
     output.close();
 }
 
