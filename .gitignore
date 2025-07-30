@@ -60,3 +60,11 @@ build.ninja
 *.exe
 *.out
 *.app
+
+# Python
+.idea/
+.venv/
+__pycache__/
+
+# other
+*.xml
