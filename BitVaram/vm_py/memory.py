@@ -1,5 +1,5 @@
 from limits import *
-from variable import Variable
+from BitVaram.vm_py.types.variable import Variable
 
 
 def is_valid_address(address: int) -> bool:
@@ -10,7 +10,7 @@ class Memory:
 
     def __init__(self):
         self.limit = MEMORY_LIMIT
-        self.table = set()  # not free fields
+        self.table = set()  # writen fields
 
 
     def malloc(self, cls: type, value) -> Variable:

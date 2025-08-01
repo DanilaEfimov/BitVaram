@@ -1,10 +1,10 @@
-from ..variable import Variable
+from BitVaram.vm_py.types.variable import Variable
 from ..memory import is_valid_address
 
 class Integer(Variable):
 
     def __init__(self, value: int, identifier: str, address: int):
-        if(is_valid_address(address)):
+        if is_valid_address(address):
             self.value = value
             self.address = address
             self.name = identifier
