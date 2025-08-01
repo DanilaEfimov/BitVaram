@@ -23,7 +23,8 @@ namespace compiler::statemates {
 		Assignment,
 		Binexpr,
 		Condition,
-		Cycle
+		Cycle,
+		Function_call
 	};
 
 	struct statemate;
@@ -451,6 +452,106 @@ namespace compiler::statemates {
 
 	};	// binexpr
 
+	struct function_call : statemate {
+		std::string func_name;
+		boost::json::array args;
+
+		function_call(parent_ptr parent = nullptr)
+			: statemate(parent), func_name(), args() {}
+		function_call(parent_ptr parent, const std::vector<expression>& source) {
+			if (source.size() == 0) {
+				throw std::runtime_error("function_call::empty source code");
+			}
+
+			expression expr = source[0];
+
+			if (!function_call::isValidSyntax(expr)) {
+				throw std::runtime_error("function_call::invalid syntax");
+			}
+
+			this->root = parent;
+			this->func_name = expr[0].getValue();
+
+			this->args.clear();
+			for (size_t i = 2; i + 1 < expr.size(); i += 2) {
+				this->args.push_back(boost::json::string(expr[i].getValue()));
+			}
+		};
+		virtual ~function_call() = default;
+
+		virtual bool isNil() const override {
+			return true;
+		}
+
+		virtual const char* name() const override {
+			return "function_call";
+		}
+
+		virtual const boost::json::object& toJson() const override {
+			this->obj.clear();
+
+			this->obj["type"] = this->name();
+			this->obj["function"] = this->func_name;
+
+			boost::json::array arr;
+			for (const auto& arg : this->args) {
+				try {
+					size_t pos;
+					int num = std::stoi(arg.as_string().c_str(), &pos);
+					if (pos == arg.as_string().size()) {
+						arr.push_back(num);
+					}
+					else {
+						arr.push_back(arg);
+					}
+				}
+				catch (...) {
+					arr.push_back(arg);
+				}
+			}
+			this->obj["arguments"] = arr;
+
+			return this->obj;
+		}
+
+		static bool isValidSyntax(const expression& expr) {
+			if (expr.size() < 3) return false;
+
+			if (expr[0].getType() != TokenType::IDENTIFIER) return false;
+			if (!(expr[1].getType() == TokenType::OPERATOR
+				&& expr[1].getValue() == FUNC_OPEN_BRACKET)) return false;
+			if (!(expr.back().getType() == TokenType::OPERATOR
+				&& expr.back().getValue() == FUNC_CLOSE_BRACKET)) return false;
+
+			int i = 2;
+			while (i < expr.size() - 1) {
+				if (!(expr[i].getType() == TokenType::IDENTIFIER
+					|| expr[i].getType() == TokenType::NUMBER))
+					return false;
+
+				i++;
+
+				if (i < expr.size() - 1) {
+					if (expr[i].getType() != TokenType::SEPARATOR)
+						return false;
+					i++;
+				}
+			}
+
+			return true;
+		}
+
+		static int getStatemateBound(const std::vector<expression>& source) {
+			for (int i = 0; i < source.size(); i++) {
+				if (function_call::isValidSyntax(source[i])) {
+					return i;
+				}
+			}
+			throw std::runtime_error("function_call::header not found");
+		}
+
+	};	//	function_call
+
 	// ^^^ PRIME AST NODES / NON PRIME STATEMATES vvv
 
 	struct block : statemate {
@@ -681,6 +782,9 @@ namespace compiler::statemates {
 			if (binexpr::isValidSyntax(body)) {
 				this->right = std::make_unique<binexpr>(this, std::vector<expression>{ body });
 			}
+			else if (function_call::isValidSyntax(body)) {
+				this->right = std::make_unique<function_call>(this, std::vector<expression>{ body });
+			}
 			else {
 				throw std::runtime_error("assignment::invalid body expression");
 			}
@@ -715,7 +819,7 @@ namespace compiler::statemates {
 			for (int i = 0; i + 1 < static_cast<int>(source.size()); ++i) {
 				const expression& header = source[i];
 
-				if (isValidSyntax(header)) {
+				if (assignment::isValidSyntax(header)) {
 					return i + 1;
 				}
 			}
@@ -884,6 +988,8 @@ namespace compiler::statemates {
 			return StatemateType::Condition;
 		if (cycle::isValidSyntax(expr))
 			return StatemateType::Cycle;
+		if (function_call::isValidSyntax(expr))
+			return StatemateType::Function_call;
 		if (system_call::isValidSyntax(expr))
 			return StatemateType::System_call;
 		if (block::isValidSyntax(expr))
@@ -933,6 +1039,9 @@ namespace compiler::statemates {
 		case StatemateType::Cycle:
 			return std::unique_ptr<statemate>
 				(new cycle(parent, code));
+		case StatemateType::Function_call:
+			return std::unique_ptr<statemate>
+				(new function_call(parent, code));
 		default:
 		{
 			return nullptr;
@@ -975,6 +1084,9 @@ namespace compiler::statemates {
 			break;
 		case StatemateType::Cycle:
 			end += cycle::getStatemateBound(code);
+			break;
+		case StatemateType::Function_call:
+			end += function_call::getStatemateBound(code);
 			break;
 		default:
 			{
