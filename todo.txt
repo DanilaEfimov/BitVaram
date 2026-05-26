@@ -1,0 +1,14 @@
+memory classes:
+stack
+heap
+slab
+call stack
+
+value types:
+big int
+double
+raw bytes
+arrays
+bit
+text
+json
