@@ -3,6 +3,7 @@
 #include "Memory.h"
 
 #include <stdexcept>
+#include <array>
 
 template<size_t L>
 class Bytes : public Memory

@@ -6,6 +6,8 @@
 
 class ByteLine : public Memory
 {
+	friend class Bit;
+
 	std::vector<Memory::byte_t> line;
 
 public:

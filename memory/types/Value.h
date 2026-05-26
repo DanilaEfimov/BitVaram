@@ -10,6 +10,6 @@ public:
 	virtual T get() const = 0;
 	virtual void set(const T& val) = 0;
 
-	virtual bool operator==(const Value<T>& right) const = 0;
+	virtual bool operator==(const T& right) const = 0;
 };
 
