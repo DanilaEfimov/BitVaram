@@ -1,5 +1,7 @@
 #include "Int64.h"
 
+#include <cmath>
+
 Int64::Int64(int64_t val)
 	: val(val)
 {}
@@ -43,17 +45,20 @@ bool Int64::operator>(const Number<int64_t>& right) const
 	return this->val > right.get();
 }
 
-bool Int64::operator==(const Value<int64_t>& right) const
+bool Int64::operator==(const int64_t& right) const
 {
-	return this->val == right.get();
+	return this->val == right;
 }
 
 int Int64::sign() const
 {
-	return this->val != 0;
+	if (this->val == 0)
+		return 0;
+
+	return this->val > 0 ? 1 : -1;
 }
 
 int64_t Int64::abs() const
 {
-	return this->val;
+	return std::abs(this->val);
 }

@@ -19,7 +19,7 @@ public:
 	int64_t operator/(const Number<int64_t>& right) const override;
 
 	bool operator>(const Number<int64_t>& right) const override;
-	bool operator==(const Value<int64_t>& right) const override;
+	bool operator==(const int64_t& right) const override;
 
 	int sign() const override;
 	int64_t abs() const override;

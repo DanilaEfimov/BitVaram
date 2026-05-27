@@ -9,7 +9,7 @@ void Bit::write(size_t pos, bool value)
 	size_t bytePos = pos / 8;
 	size_t bitPos = pos % 8;
 
-	Memory::byte_t dest = Bit::line.read(pos);
+	Memory::byte_t dest = Bit::line.read(bytePos);
 	Memory::byte_t mask = static_cast<Memory::byte_t>(1 << bitPos);
 
 	if (value)
@@ -23,7 +23,7 @@ bool Bit::read(size_t pos)
 	size_t bytePos = pos / 8;
 	size_t bitPos = pos % 8;
 
-	Memory::byte_t dest = Bit::line.read(pos);
+	Memory::byte_t dest = Bit::line.read(bytePos);
 	Memory::byte_t mask = static_cast<Memory::byte_t>(1 << bitPos);
 
 	return dest & mask;

@@ -7,7 +7,7 @@
 
 template<typename T>
 requires std::is_unsigned_v<T>
-class UnsignedNumber : Number<T>
+class UnsignedNumber : public Number<T>
 {
 	T num;
 

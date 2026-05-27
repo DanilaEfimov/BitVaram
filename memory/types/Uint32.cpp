@@ -1,4 +1,4 @@
-#include "Uint32_t.h"
+#include "Uint32.h"
 
 Uint32::Uint32(uint32_t num)
 	: val(num)
@@ -43,7 +43,7 @@ bool Uint32::operator>(const Number<uint32_t>& right) const
 	return this->val > right.get();
 }
 
-bool Uint32::operator==(const Value<uint32_t>& right) const
+bool Uint32::operator==(const uint32_t& right) const
 {
-	return this->val == right.get();
+	return this->val == right;
 }

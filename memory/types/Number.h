@@ -17,6 +17,6 @@ public:
 	virtual bool operator>(const Number<T>& right) const = 0;
 	virtual bool operator<(const Number<T>& right) const
 	{
-		return !this->operator==(right) && !this->operator>(right);
+		return !this->operator==(right.get()) && !this->operator>(right);
 	}
 };

@@ -13,19 +13,15 @@ class Array : public Value<T*>
 public:
 	[[deprecated("use operator[] instead")]] virtual T* get() const
 	{
-		return this->elements.data();
+		return const_cast<T*>(this->elements.data());
 	}
 
-	[[deprecated("use operator[] instead")]] virtual void set(const T*& val)
+	[[deprecated("use operator[] instead")]] virtual void set(T* const& val)
 	{
-		if (this->elements.data() == val)
-			return;
-
 		this->elements.clear();
-		this->elements.data() = val;
 	}
 
-	[[deprecated("Value legacy api")]] virtual bool operator==(const T*& right) const
+	[[deprecated("Value legacy api")]] virtual bool operator==(T* const& right) const
 	{
 		return this->elements.data() == right;
 	}

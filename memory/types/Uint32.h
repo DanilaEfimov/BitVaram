@@ -19,6 +19,6 @@ public:
 	uint32_t operator/(const Number<uint32_t>& right) const override;
 
 	bool operator>(const Number<uint32_t>& right) const override;
-	bool operator==(const Value<uint32_t>& right) const override;
+	bool operator==(const uint32_t& right) const override;
 };
 

@@ -4,7 +4,7 @@
 #include "Bytes.h"
 #include "Memory.h"
 
-inline static constexpr size_t rawBytesSize = 16;
+inline static constexpr size_t rawBytesSize = 8;
 
 class RawBytes : public Value<Bytes<rawBytesSize>>
 {

@@ -45,9 +45,9 @@ bool Int32::operator>(const Number<int32_t>& right) const
 	return this->val > right.get();
 }
 
-bool Int32::operator==(const Value<int32_t>& right) const
+bool Int32::operator==(const int32_t& right) const
 {
-	return this->val == right.get();
+	return this->val == right;
 }
 
 int Int32::sign() const
