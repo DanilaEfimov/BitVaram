@@ -2,7 +2,7 @@
 
 #include "UnsignedNumber.h"
 
-class Uint32 : public UnsignedNumber<uint32_t>
+class Uint32 final : public UnsignedNumber<uint32_t>
 {
 	uint32_t val;
 

@@ -6,10 +6,9 @@
 
 inline static constexpr size_t rawBytesSize = 8;
 
-class RawBytes : public Value<Bytes<rawBytesSize>>
+class RawBytes final : public Value<Bytes<rawBytesSize>>
 {
 	using value_t = Bytes<rawBytesSize>;
-
 	value_t data;
 
 public:

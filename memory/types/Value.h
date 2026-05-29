@@ -1,7 +1,9 @@
 #pragma once
 
+#include "IValue.h"
+
 template<typename T>
-class Value
+class Value : public IValue
 {
 public:
 	Value() = default;

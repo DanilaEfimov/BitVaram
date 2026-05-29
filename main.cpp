@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Double.h"
 #include "Int32.h"
 #include "Int64.h"
 #include "Uint32.h"
@@ -147,6 +148,13 @@ void demo_raw_bytes() {
     std::cout << std::dec;
 }
 
+void demo_double() {
+    std::cout << "=== Double ===" << std::endl;
+    Double a(123.456);
+    auto exp = a.exponent();
+    auto sign = a.sign();
+}
+
 int main() {
     demo_int32();
     demo_int64();
@@ -155,5 +163,6 @@ int main() {
     demo_array();
     demo_bit();
     demo_raw_bytes();
+    demo_double();
     return 0;
 }

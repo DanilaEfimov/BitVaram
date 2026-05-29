@@ -2,7 +2,7 @@
 
 #include "SignedNumber.h"
 
-class Int32 : public SignedNumber<int32_t>
+class Int32 final : public SignedNumber<int32_t>
 {
 	int32_t val;
 
