@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Value.h"
+#include "NumberExtensionConcept.h"
 
 #include <concepts>
 
+class BigIntImpl;
+
 template<typename T>
-requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T> || NumberExtension<T>
 class Number : public Value<T>
 {
 public:

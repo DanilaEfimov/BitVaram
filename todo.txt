@@ -5,4 +5,4 @@ slab
 call stack
 
 value types:
-big int
+big int impl

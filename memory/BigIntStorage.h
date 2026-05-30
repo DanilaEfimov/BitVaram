@@ -10,6 +10,7 @@ class BigIntStorage : public Memory
 
 public:
 	BigIntStorage();
+	BigIntStorage(size_t size);
 	
 	size_t size() const noexcept override;
 	

@@ -6,6 +6,10 @@ BigIntStorage::BigIntStorage()
     : bytes(1, 0)
 {}
 
+BigIntStorage::BigIntStorage(size_t size)
+    : bytes(size, 0)
+{}
+
 size_t BigIntStorage::size() const noexcept
 {
     return this->bytes.size();
